@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { formatCurrency, getStatusColor } from "@/lib/utils";
-import { Plus, Pencil, Trash2 } from "lucide-react";
+import { Plus, Pencil, Trash2, FileCheck } from "lucide-react";
 import ProposalForm from "@/components/forms/ProposalForm";
 import DeleteConfirmDialog from "@/components/forms/DeleteConfirmDialog";
 import { deleteProposal } from "@/lib/actions/proposal.actions";
@@ -36,12 +36,21 @@ export default async function ProposalsPage() {
       </div>
 
       <Card>
-        <CardContent className="pt-0 divide-y">
+        <CardContent className="p-0">
           {proposals.length === 0 && (
-            <p className="text-sm text-muted-foreground py-6">No proposals yet.</p>
+            <div className="flex flex-col items-center justify-center py-16 text-center">
+              <div className="flex items-center justify-center w-12 h-12 rounded-full bg-muted mb-4">
+                <FileCheck className="h-6 w-6 text-muted-foreground" />
+              </div>
+              <p className="font-medium text-sm">No proposals yet</p>
+              <p className="text-muted-foreground text-sm mt-1">Create a proposal to send to a client.</p>
+            </div>
           )}
-          {proposals.map((p) => (
-            <div key={p.id} className="flex items-center justify-between py-4 gap-4">
+          {proposals.map((p, i) => (
+            <div
+              key={p.id}
+              className={`flex items-center justify-between px-5 py-4 gap-4 hover:bg-muted/40 transition-colors ${i < proposals.length - 1 ? "border-b" : ""}`}
+            >
               <div className="flex-1 min-w-0">
                 <p className="font-medium text-sm">{p.title}</p>
                 <p className="text-xs text-muted-foreground">
@@ -56,7 +65,7 @@ export default async function ProposalsPage() {
               </div>
               <div className="flex items-center gap-3 shrink-0">
                 {p.amount && (
-                  <p className="font-semibold text-sm">{formatCurrency(p.amount)}</p>
+                  <p className="font-semibold text-sm hidden sm:block">{formatCurrency(p.amount)}</p>
                 )}
                 <Badge variant="outline" className={getStatusColor(p.status)}>
                   {p.status}
@@ -66,14 +75,14 @@ export default async function ProposalsPage() {
                   projects={projects}
                   defaultValues={p}
                   trigger={
-                    <button className="text-muted-foreground hover:text-foreground transition-colors">
+                    <button className="text-muted-foreground hover:text-foreground transition-colors p-1 rounded cursor-pointer">
                       <Pencil className="h-3.5 w-3.5" />
                     </button>
                   }
                 />
                 <DeleteConfirmDialog
                   trigger={
-                    <button className="text-muted-foreground hover:text-destructive transition-colors">
+                    <button className="text-muted-foreground hover:text-destructive transition-colors p-1 rounded cursor-pointer">
                       <Trash2 className="h-3.5 w-3.5" />
                     </button>
                   }
