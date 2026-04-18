@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 import { prisma } from "@/lib/db";
 import InvoiceForm from "@/components/forms/InvoiceForm";
 import Link from "next/link";
