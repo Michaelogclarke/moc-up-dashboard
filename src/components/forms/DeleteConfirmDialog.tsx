@@ -10,12 +10,14 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
+import type { ActionResult } from "@/lib/actions/types";
 
 interface Props {
   trigger: React.ReactNode;
   title?: string;
   description?: string;
-  action: () => Promise<void>;
+  action: () => Promise<ActionResult | void>;
 }
 
 export default function DeleteConfirmDialog({
@@ -29,7 +31,10 @@ export default function DeleteConfirmDialog({
 
   function handleConfirm() {
     startTransition(async () => {
-      await action();
+      const result = await action();
+      if (result?.error) {
+        toast.error(result.error);
+      }
       setOpen(false);
     });
   }

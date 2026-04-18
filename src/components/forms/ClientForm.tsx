@@ -13,6 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { createClient, updateClient } from "@/lib/actions/client.actions";
+import { toast } from "sonner";
 
 type ClientData = {
   id: string;
@@ -37,12 +38,14 @@ export default function ClientForm({ trigger, defaultValues }: Props) {
 
   function handleSubmit(formData: FormData) {
     startTransition(async () => {
-      if (isEdit) {
-        await updateClient(defaultValues.id, formData);
+      const result = isEdit
+        ? await updateClient(defaultValues.id, formData)
+        : await createClient(formData);
+      if (result?.error) {
+        toast.error(result.error);
       } else {
-        await createClient(formData);
+        setOpen(false);
       }
-      setOpen(false);
     });
   }
 

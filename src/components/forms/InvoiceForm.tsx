@@ -1,12 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { createInvoice, updateInvoice } from "@/lib/actions/invoice.actions";
 import { formatCurrency } from "@/lib/utils";
+import { toast } from "sonner";
 import { Plus, Trash2 } from "lucide-react";
 
 type LineItem = { id?: string; description: string; quantity: string; unitPrice: string };
@@ -34,6 +35,7 @@ interface Props {
 
 export default function InvoiceForm({ clients, projects, defaultValues, nextNumber }: Props) {
   const isEdit = !!defaultValues;
+  const [isPending, startTransition] = useTransition();
 
   const [items, setItems] = useState<LineItem[]>(
     defaultValues?.items.map((i) => ({
@@ -60,14 +62,16 @@ export default function InvoiceForm({ clients, projects, defaultValues, nextNumb
     setItems(items.map((item, i) => (i === index ? { ...item, [field]: value } : item)));
   }
 
-  async function handleSubmit(formData: FormData) {
+  function handleSubmit(formData: FormData) {
     formData.set("items", JSON.stringify(items));
-    formData.set("amount", String(total));
-    if (isEdit) {
-      await updateInvoice(defaultValues.id, formData);
-    } else {
-      await createInvoice(formData);
-    }
+    startTransition(async () => {
+      const result = isEdit
+        ? await updateInvoice(defaultValues.id, formData)
+        : await createInvoice(formData);
+      if (result?.error) {
+        toast.error(result.error);
+      }
+    });
   }
 
   return (
@@ -184,7 +188,7 @@ export default function InvoiceForm({ clients, projects, defaultValues, nextNumb
                     <button
                       type="button"
                       onClick={() => removeItem(i)}
-                      className="text-muted-foreground hover:text-destructive transition-colors"
+                      className="text-muted-foreground hover:text-destructive transition-colors cursor-pointer"
                     >
                       <Trash2 className="h-3.5 w-3.5" />
                     </button>
@@ -212,7 +216,9 @@ export default function InvoiceForm({ clients, projects, defaultValues, nextNumb
       </div>
 
       <div className="flex gap-3">
-        <Button type="submit">{isEdit ? "Save Changes" : "Create Invoice"}</Button>
+        <Button type="submit" disabled={isPending}>
+          {isPending ? "Saving..." : isEdit ? "Save Changes" : "Create Invoice"}
+        </Button>
         <Button type="button" variant="outline" onClick={() => window.history.back()}>
           Cancel
         </Button>

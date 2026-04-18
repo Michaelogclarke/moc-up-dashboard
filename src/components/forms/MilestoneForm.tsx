@@ -13,6 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { createMilestone, updateMilestone } from "@/lib/actions/milestone.actions";
+import { toast } from "sonner";
 
 type MilestoneData = {
   id: string;
@@ -37,12 +38,14 @@ export default function MilestoneForm({ trigger, projectId, defaultValues }: Pro
   function handleSubmit(formData: FormData) {
     formData.set("projectId", projectId);
     startTransition(async () => {
-      if (isEdit) {
-        await updateMilestone(defaultValues.id, formData);
+      const result = isEdit
+        ? await updateMilestone(defaultValues.id, formData)
+        : await createMilestone(formData);
+      if (result?.error) {
+        toast.error(result.error);
       } else {
-        await createMilestone(formData);
+        setOpen(false);
       }
-      setOpen(false);
     });
   }
 

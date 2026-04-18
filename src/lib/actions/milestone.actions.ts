@@ -3,38 +3,50 @@
 import { prisma } from "@/lib/db";
 import { revalidatePath } from "next/cache";
 import type { MilestoneStatus } from "@prisma/client";
+import type { ActionResult } from "./types";
 
-export async function createMilestone(formData: FormData) {
+export async function createMilestone(formData: FormData): Promise<ActionResult> {
   const projectId = formData.get("projectId") as string;
-  await prisma.milestone.create({
-    data: {
-      title: formData.get("title") as string,
-      description: (formData.get("description") as string) || null,
-      status: (formData.get("status") as MilestoneStatus) || "PENDING",
-      dueDate: formData.get("dueDate") ? new Date(formData.get("dueDate") as string) : null,
-      projectId,
-    },
-  });
-  revalidatePath(`/projects/${projectId}`);
+  try {
+    await prisma.milestone.create({
+      data: {
+        title: formData.get("title") as string,
+        description: (formData.get("description") as string) || null,
+        status: (formData.get("status") as MilestoneStatus) || "PENDING",
+        dueDate: formData.get("dueDate") ? new Date(formData.get("dueDate") as string) : null,
+        projectId,
+      },
+    });
+    revalidatePath(`/projects/${projectId}`);
+  } catch {
+    return { error: "Failed to create milestone. Please try again." };
+  }
 }
 
-export async function updateMilestone(id: string, formData: FormData) {
+export async function updateMilestone(id: string, formData: FormData): Promise<ActionResult> {
   const projectId = formData.get("projectId") as string;
-  await prisma.milestone.update({
-    where: { id },
-    data: {
-      title: formData.get("title") as string,
-      description: (formData.get("description") as string) || null,
-      status: (formData.get("status") as MilestoneStatus) || "PENDING",
-      dueDate: formData.get("dueDate") ? new Date(formData.get("dueDate") as string) : null,
-      completedAt:
-        formData.get("status") === "COMPLETE" ? new Date() : null,
-    },
-  });
-  revalidatePath(`/projects/${projectId}`);
+  try {
+    await prisma.milestone.update({
+      where: { id },
+      data: {
+        title: formData.get("title") as string,
+        description: (formData.get("description") as string) || null,
+        status: (formData.get("status") as MilestoneStatus) || "PENDING",
+        dueDate: formData.get("dueDate") ? new Date(formData.get("dueDate") as string) : null,
+        completedAt: formData.get("status") === "COMPLETE" ? new Date() : null,
+      },
+    });
+    revalidatePath(`/projects/${projectId}`);
+  } catch {
+    return { error: "Failed to update milestone. Please try again." };
+  }
 }
 
-export async function deleteMilestone(id: string, projectId: string) {
-  await prisma.milestone.delete({ where: { id } });
-  revalidatePath(`/projects/${projectId}`);
+export async function deleteMilestone(id: string, projectId: string): Promise<ActionResult> {
+  try {
+    await prisma.milestone.delete({ where: { id } });
+    revalidatePath(`/projects/${projectId}`);
+  } catch {
+    return { error: "Failed to delete milestone. Please try again." };
+  }
 }

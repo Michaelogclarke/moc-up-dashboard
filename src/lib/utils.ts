@@ -55,7 +55,7 @@ export function getStatusColor(status: string): string {
     // Milestones
     case "PENDING":
       return "text-slate-500 border-slate-200";
-    case "IN-PROGRESS":
+    case "IN_PROGRESS":
       return "text-blue-600 border-blue-200";
     default:
       return "";

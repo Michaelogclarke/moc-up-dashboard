@@ -13,6 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { createProject, updateProject } from "@/lib/actions/project.actions";
+import { toast } from "sonner";
 
 type ClientOption = { id: string; name: string };
 
@@ -44,12 +45,14 @@ export default function ProjectForm({ trigger, clients, defaultValues, defaultCl
 
   function handleSubmit(formData: FormData) {
     startTransition(async () => {
-      if (isEdit) {
-        await updateProject(defaultValues.id, formData);
+      const result = isEdit
+        ? await updateProject(defaultValues.id, formData)
+        : await createProject(formData);
+      if (result?.error) {
+        toast.error(result.error);
       } else {
-        await createProject(formData);
+        setOpen(false);
       }
-      setOpen(false);
     });
   }
 

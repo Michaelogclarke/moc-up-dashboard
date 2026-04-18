@@ -2,6 +2,7 @@
 
 import { useTransition } from "react";
 import { cycleTaskStatus } from "@/lib/actions/task.actions";
+import { toast } from "sonner";
 import type { TaskStatus } from "@prisma/client";
 
 const labels: Record<TaskStatus, string> = {
@@ -28,7 +29,10 @@ export default function TaskStatusToggle({ id, status, projectId }: Props) {
   function handleClick(e: React.MouseEvent) {
     e.preventDefault();
     e.stopPropagation();
-    startTransition(() => cycleTaskStatus(id, status, projectId));
+    startTransition(async () => {
+      const result = await cycleTaskStatus(id, status, projectId);
+      if (result?.error) toast.error(result.error);
+    });
   }
 
   return (
@@ -36,7 +40,7 @@ export default function TaskStatusToggle({ id, status, projectId }: Props) {
       onClick={handleClick}
       disabled={isPending}
       title="Click to advance status"
-      className={`rounded-full px-2.5 py-0.5 text-xs font-medium transition-colors disabled:opacity-50 ${colors[status]}`}
+      className={`rounded-full px-2.5 py-0.5 text-xs font-medium transition-colors disabled:opacity-50 cursor-pointer ${colors[status]}`}
     >
       {isPending ? "..." : labels[status]}
     </button>

@@ -13,6 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { createTask, updateTask } from "@/lib/actions/task.actions";
+import { toast } from "sonner";
 
 type TaskData = {
   id: string;
@@ -38,12 +39,14 @@ export default function TaskForm({ trigger, projectId, defaultValues }: Props) {
   function handleSubmit(formData: FormData) {
     formData.set("projectId", projectId);
     startTransition(async () => {
-      if (isEdit) {
-        await updateTask(defaultValues.id, formData);
+      const result = isEdit
+        ? await updateTask(defaultValues.id, formData)
+        : await createTask(formData);
+      if (result?.error) {
+        toast.error(result.error);
       } else {
-        await createTask(formData);
+        setOpen(false);
       }
-      setOpen(false);
     });
   }
 

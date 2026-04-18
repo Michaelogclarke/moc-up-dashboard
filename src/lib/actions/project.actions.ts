@@ -4,6 +4,7 @@ import { prisma } from "@/lib/db";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import type { ProjectStatus } from "@prisma/client";
+import type { ActionResult } from "./types";
 
 function parseProject(formData: FormData) {
   return {
@@ -26,35 +27,55 @@ function parseProject(formData: FormData) {
   };
 }
 
-export async function createProject(formData: FormData) {
+export async function createProject(formData: FormData): Promise<ActionResult> {
   const data = parseProject(formData);
-  await prisma.project.create({ data });
-  revalidatePath("/projects");
-  revalidatePath("/dashboard");
-  revalidatePath(`/clients/${data.clientId}`);
+  try {
+    await prisma.project.create({ data });
+    revalidatePath("/projects");
+    revalidatePath("/dashboard");
+    revalidatePath(`/clients/${data.clientId}`);
+  } catch {
+    return { error: "Failed to create project. Please try again." };
+  }
 }
 
-export async function updateProject(id: string, formData: FormData) {
+export async function updateProject(id: string, formData: FormData): Promise<ActionResult> {
   const data = parseProject(formData);
-  await prisma.project.update({ where: { id }, data });
-  revalidatePath("/projects");
-  revalidatePath(`/projects/${id}`);
-  revalidatePath("/dashboard");
-  revalidatePath(`/clients/${data.clientId}`);
+  try {
+    await prisma.project.update({ where: { id }, data });
+    revalidatePath("/projects");
+    revalidatePath(`/projects/${id}`);
+    revalidatePath("/dashboard");
+    revalidatePath(`/clients/${data.clientId}`);
+  } catch {
+    return { error: "Failed to update project. Please try again." };
+  }
 }
 
-export async function updateProjectStatus(id: string, status: ProjectStatus, clientId: string) {
-  await prisma.project.update({ where: { id }, data: { status } });
-  revalidatePath("/projects");
-  revalidatePath(`/projects/${id}`);
-  revalidatePath("/dashboard");
-  revalidatePath(`/clients/${clientId}`);
+export async function updateProjectStatus(
+  id: string,
+  status: ProjectStatus,
+  clientId: string
+): Promise<ActionResult> {
+  try {
+    await prisma.project.update({ where: { id }, data: { status } });
+    revalidatePath("/projects");
+    revalidatePath(`/projects/${id}`);
+    revalidatePath("/dashboard");
+    revalidatePath(`/clients/${clientId}`);
+  } catch {
+    return { error: "Failed to update status." };
+  }
 }
 
-export async function deleteProject(id: string, clientId: string) {
-  await prisma.project.delete({ where: { id } });
-  revalidatePath("/projects");
-  revalidatePath("/dashboard");
-  revalidatePath(`/clients/${clientId}`);
+export async function deleteProject(id: string, clientId: string): Promise<ActionResult> {
+  try {
+    await prisma.project.delete({ where: { id } });
+    revalidatePath("/projects");
+    revalidatePath("/dashboard");
+    revalidatePath(`/clients/${clientId}`);
+  } catch {
+    return { error: "Failed to delete project. Please try again." };
+  }
   redirect("/projects");
 }

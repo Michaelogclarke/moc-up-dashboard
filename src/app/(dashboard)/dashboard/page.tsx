@@ -52,7 +52,7 @@ export default async function DashboardPage() {
   const data = await getDashboardData();
 
   return (
-    <div className="space-y-8 max-w-6xl">
+    <div className="space-y-6 lg:space-y-8 max-w-6xl">
       <div>
         <h2 className="text-2xl font-bold tracking-tight">Overview</h2>
         <p className="text-muted-foreground mt-1">Welcome back, Michael.</p>
@@ -88,7 +88,7 @@ export default async function DashboardPage() {
         />
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-2">
+      <div className="grid gap-4 lg:gap-6 lg:grid-cols-2">
         {/* Active Projects */}
         <Card className="shadow-sm">
           <CardHeader className="pb-3">

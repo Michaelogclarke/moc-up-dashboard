@@ -13,6 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { createProposal, updateProposal } from "@/lib/actions/proposal.actions";
+import { toast } from "sonner";
 
 type ClientOption = { id: string; name: string };
 type ProjectOption = { id: string; name: string };
@@ -42,12 +43,14 @@ export default function ProposalForm({ trigger, clients, projects, defaultValues
 
   function handleSubmit(formData: FormData) {
     startTransition(async () => {
-      if (isEdit) {
-        await updateProposal(defaultValues.id, formData);
+      const result = isEdit
+        ? await updateProposal(defaultValues.id, formData)
+        : await createProposal(formData);
+      if (result?.error) {
+        toast.error(result.error);
       } else {
-        await createProposal(formData);
+        setOpen(false);
       }
-      setOpen(false);
     });
   }
 
