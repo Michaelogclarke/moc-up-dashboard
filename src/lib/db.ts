@@ -8,9 +8,8 @@ function getPrisma() {
   if (globalForPrisma.prisma) return globalForPrisma.prisma;
   const client = new PrismaClient({
     log: process.env.NODE_ENV === "development" ? ["error", "warn"] : ["error"],
-    datasources: { db: { url: process.env.DIRECT_URL } },
   });
-  if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = client;
+  globalForPrisma.prisma = client;
   return client;
 }
 
