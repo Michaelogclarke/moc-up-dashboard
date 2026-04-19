@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
 import { formatCurrency, getStatusColor } from "@/lib/utils";
 import { TrendingUp, FolderKanban, FileText, CheckSquare } from "lucide-react";
+import OnboardingGuide from "@/components/dashboard/OnboardingGuide";
 
 async function getDashboardData() {
   const [
@@ -54,6 +55,8 @@ export default async function DashboardPage() {
 
   return (
     <div className="space-y-6 lg:space-y-8 max-w-6xl">
+      <OnboardingGuide />
+
       <div>
         <h2 className="text-2xl font-bold tracking-tight">Overview</h2>
         <p className="text-muted-foreground mt-1">Welcome back, Michael.</p>
