@@ -1,7 +1,7 @@
 "use server";
 
 import { prisma } from "@/lib/db";
-import { revalidatePath } from "next/cache";
+import { revalidateTag } from "next/cache";
 import { redirect } from "next/navigation";
 import type { ActionResult } from "./types";
 
@@ -18,8 +18,8 @@ export async function createClient(formData: FormData): Promise<ActionResult> {
         status: (formData.get("status") as "ACTIVE" | "INACTIVE" | "LEAD") || "ACTIVE",
       },
     });
-    revalidatePath("/clients");
-    revalidatePath("/dashboard");
+    revalidateTag("clients");
+    revalidateTag("dashboard");
   } catch {
     return { error: "Failed to create client. Please try again." };
   }
@@ -39,9 +39,8 @@ export async function updateClient(id: string, formData: FormData): Promise<Acti
         status: (formData.get("status") as "ACTIVE" | "INACTIVE" | "LEAD") || "ACTIVE",
       },
     });
-    revalidatePath("/clients");
-    revalidatePath(`/clients/${id}`);
-    revalidatePath("/dashboard");
+    revalidateTag("clients");
+    revalidateTag("dashboard");
   } catch {
     return { error: "Failed to update client. Please try again." };
   }
@@ -50,8 +49,8 @@ export async function updateClient(id: string, formData: FormData): Promise<Acti
 export async function deleteClient(id: string): Promise<ActionResult> {
   try {
     await prisma.client.delete({ where: { id } });
-    revalidatePath("/clients");
-    revalidatePath("/dashboard");
+    revalidateTag("clients");
+    revalidateTag("dashboard");
   } catch {
     return { error: "Failed to delete client. Please try again." };
   }

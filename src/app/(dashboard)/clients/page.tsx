@@ -1,5 +1,6 @@
 
 import { prisma } from "@/lib/db";
+import { unstable_cache } from "next/cache";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -31,15 +32,17 @@ function ClientAvatar({ name }: { name: string }) {
   );
 }
 
-export default async function ClientsPage() {
-  const clients = await prisma.client.findMany({
-    include: {
-      projects: true,
-      invoices: true,
-      _count: { select: { projects: true } },
-    },
+const getClients = unstable_cache(
+  () => prisma.client.findMany({
+    include: { projects: true, invoices: true, _count: { select: { projects: true } } },
     orderBy: { name: "asc" },
-  });
+  }),
+  ["clients"],
+  { tags: ["clients"] }
+);
+
+export default async function ClientsPage() {
+  const clients = await getClients();
 
   return (
     <div className="space-y-6">

@@ -1,5 +1,6 @@
 
 import { prisma } from "@/lib/db";
+import { unstable_cache } from "next/cache";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
@@ -34,11 +35,17 @@ const columns = [
   },
 ] as const;
 
-export default async function TasksPage() {
-  const tasks = await prisma.task.findMany({
+const getTasks = unstable_cache(
+  () => prisma.task.findMany({
     include: { project: { include: { client: true } } },
     orderBy: [{ status: "asc" }, { dueDate: "asc" }],
-  });
+  }),
+  ["tasks"],
+  { tags: ["tasks"] }
+);
+
+export default async function TasksPage() {
+  const tasks = await getTasks();
 
   return (
     <div className="space-y-6">

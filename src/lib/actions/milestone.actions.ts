@@ -1,7 +1,7 @@
 "use server";
 
 import { prisma } from "@/lib/db";
-import { revalidatePath } from "next/cache";
+import { revalidateTag } from "next/cache";
 import type { MilestoneStatus } from "@prisma/client";
 import type { ActionResult } from "./types";
 
@@ -17,7 +17,6 @@ export async function createMilestone(formData: FormData): Promise<ActionResult>
         projectId,
       },
     });
-    revalidatePath(`/projects/${projectId}`);
   } catch {
     return { error: "Failed to create milestone. Please try again." };
   }
@@ -36,7 +35,6 @@ export async function updateMilestone(id: string, formData: FormData): Promise<A
         completedAt: formData.get("status") === "COMPLETE" ? new Date() : null,
       },
     });
-    revalidatePath(`/projects/${projectId}`);
   } catch {
     return { error: "Failed to update milestone. Please try again." };
   }
@@ -45,7 +43,6 @@ export async function updateMilestone(id: string, formData: FormData): Promise<A
 export async function deleteMilestone(id: string, projectId: string): Promise<ActionResult> {
   try {
     await prisma.milestone.delete({ where: { id } });
-    revalidatePath(`/projects/${projectId}`);
   } catch {
     return { error: "Failed to delete milestone. Please try again." };
   }

@@ -1,5 +1,6 @@
 
 import { prisma } from "@/lib/db";
+import { unstable_cache } from "next/cache";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -8,11 +9,14 @@ import Link from "next/link";
 import { Plus, Pencil, FileText } from "lucide-react";
 import InvoiceMarkPaidButton from "@/components/actions/InvoiceMarkPaidButton";
 
+const getInvoices = unstable_cache(
+  () => prisma.invoice.findMany({ include: { client: true, project: true }, orderBy: { createdAt: "desc" } }),
+  ["invoices"],
+  { tags: ["invoices"] }
+);
+
 export default async function InvoicesPage() {
-  const invoices = await prisma.invoice.findMany({
-    include: { client: true, project: true },
-    orderBy: { createdAt: "desc" },
-  });
+  const invoices = await getInvoices();
 
   const stats = {
     paid:    invoices.filter((i) => i.status === "PAID").reduce((s, i) => s + i.amount, 0),

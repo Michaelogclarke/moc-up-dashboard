@@ -1,7 +1,7 @@
 "use server";
 
 import { prisma } from "@/lib/db";
-import { revalidatePath } from "next/cache";
+import { revalidateTag } from "next/cache";
 import type { ProposalStatus } from "@prisma/client";
 import type { ActionResult } from "./types";
 
@@ -20,8 +20,7 @@ export async function createProposal(formData: FormData): Promise<ActionResult> 
         projectId,
       },
     });
-    revalidatePath("/proposals");
-    revalidatePath(`/clients/${clientId}`);
+    revalidateTag("proposals");
   } catch {
     return { error: "Failed to create proposal. Please try again." };
   }
@@ -43,8 +42,7 @@ export async function updateProposal(id: string, formData: FormData): Promise<Ac
         projectId,
       },
     });
-    revalidatePath("/proposals");
-    revalidatePath(`/clients/${clientId}`);
+    revalidateTag("proposals");
   } catch {
     return { error: "Failed to update proposal. Please try again." };
   }
@@ -53,8 +51,7 @@ export async function updateProposal(id: string, formData: FormData): Promise<Ac
 export async function deleteProposal(id: string, clientId: string): Promise<ActionResult> {
   try {
     await prisma.proposal.delete({ where: { id } });
-    revalidatePath("/proposals");
-    revalidatePath(`/clients/${clientId}`);
+    revalidateTag("proposals");
   } catch {
     return { error: "Failed to delete proposal. Please try again." };
   }

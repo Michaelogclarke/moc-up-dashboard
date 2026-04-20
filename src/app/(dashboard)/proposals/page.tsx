@@ -1,5 +1,6 @@
 
 import { prisma } from "@/lib/db";
+import { unstable_cache } from "next/cache";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -9,15 +10,18 @@ import ProposalForm from "@/components/forms/ProposalForm";
 import DeleteConfirmDialog from "@/components/forms/DeleteConfirmDialog";
 import { deleteProposal } from "@/lib/actions/proposal.actions";
 
-export default async function ProposalsPage() {
-  const [proposals, clients, projects] = await Promise.all([
-    prisma.proposal.findMany({
-      include: { client: true, project: true },
-      orderBy: { createdAt: "desc" },
-    }),
+const getProposalsData = unstable_cache(
+  () => Promise.all([
+    prisma.proposal.findMany({ include: { client: true, project: true }, orderBy: { createdAt: "desc" } }),
     prisma.client.findMany({ orderBy: { name: "asc" } }),
     prisma.project.findMany({ orderBy: { name: "asc" } }),
-  ]);
+  ]),
+  ["proposals"],
+  { tags: ["proposals", "clients", "projects"] }
+);
+
+export default async function ProposalsPage() {
+  const [proposals, clients, projects] = await getProposalsData();
 
   return (
     <div className="space-y-6">

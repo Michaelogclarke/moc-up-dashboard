@@ -1,7 +1,7 @@
 "use server";
 
 import { prisma } from "@/lib/db";
-import { revalidatePath } from "next/cache";
+import { revalidateTag } from "next/cache";
 import { redirect } from "next/navigation";
 import type { ProjectStatus } from "@prisma/client";
 import type { ActionResult } from "./types";
@@ -31,9 +31,8 @@ export async function createProject(formData: FormData): Promise<ActionResult> {
   const data = parseProject(formData);
   try {
     await prisma.project.create({ data });
-    revalidatePath("/projects");
-    revalidatePath("/dashboard");
-    revalidatePath(`/clients/${data.clientId}`);
+    revalidateTag("projects");
+    revalidateTag("dashboard");
   } catch {
     return { error: "Failed to create project. Please try again." };
   }
@@ -43,10 +42,8 @@ export async function updateProject(id: string, formData: FormData): Promise<Act
   const data = parseProject(formData);
   try {
     await prisma.project.update({ where: { id }, data });
-    revalidatePath("/projects");
-    revalidatePath(`/projects/${id}`);
-    revalidatePath("/dashboard");
-    revalidatePath(`/clients/${data.clientId}`);
+    revalidateTag("projects");
+    revalidateTag("dashboard");
   } catch {
     return { error: "Failed to update project. Please try again." };
   }
@@ -59,10 +56,8 @@ export async function updateProjectStatus(
 ): Promise<ActionResult> {
   try {
     await prisma.project.update({ where: { id }, data: { status } });
-    revalidatePath("/projects");
-    revalidatePath(`/projects/${id}`);
-    revalidatePath("/dashboard");
-    revalidatePath(`/clients/${clientId}`);
+    revalidateTag("projects");
+    revalidateTag("dashboard");
   } catch {
     return { error: "Failed to update status." };
   }
@@ -71,9 +66,8 @@ export async function updateProjectStatus(
 export async function deleteProject(id: string, clientId: string): Promise<ActionResult> {
   try {
     await prisma.project.delete({ where: { id } });
-    revalidatePath("/projects");
-    revalidatePath("/dashboard");
-    revalidatePath(`/clients/${clientId}`);
+    revalidateTag("projects");
+    revalidateTag("dashboard");
   } catch {
     return { error: "Failed to delete project. Please try again." };
   }

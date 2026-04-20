@@ -1,7 +1,7 @@
 "use server";
 
 import { prisma } from "@/lib/db";
-import { revalidatePath } from "next/cache";
+import { revalidateTag } from "next/cache";
 import { redirect } from "next/navigation";
 import type { InvoiceStatus } from "@prisma/client";
 import type { ActionResult } from "./types";
@@ -37,10 +37,8 @@ export async function createInvoice(formData: FormData): Promise<ActionResult> {
         },
       },
     });
-    revalidatePath("/invoices");
-    if (projectId) revalidatePath(`/projects/${projectId}`);
-    revalidatePath(`/clients/${clientId}`);
-    revalidatePath("/dashboard");
+    revalidateTag("invoices");
+    revalidateTag("dashboard");
   } catch {
     return { error: "Failed to create invoice. Please try again." };
   }
@@ -80,10 +78,8 @@ export async function updateInvoice(id: string, formData: FormData): Promise<Act
         },
       }),
     ]);
-    revalidatePath("/invoices");
-    if (projectId) revalidatePath(`/projects/${projectId}`);
-    revalidatePath(`/clients/${clientId}`);
-    revalidatePath("/dashboard");
+    revalidateTag("invoices");
+    revalidateTag("dashboard");
   } catch {
     return { error: "Failed to update invoice. Please try again." };
   }
@@ -100,10 +96,8 @@ export async function markInvoicePaid(
       where: { id },
       data: { status: "PAID", paidAt: new Date() },
     });
-    revalidatePath("/invoices");
-    if (projectId) revalidatePath(`/projects/${projectId}`);
-    revalidatePath(`/clients/${clientId}`);
-    revalidatePath("/dashboard");
+    revalidateTag("invoices");
+    revalidateTag("dashboard");
   } catch {
     return { error: "Failed to mark invoice as paid." };
   }
@@ -116,10 +110,8 @@ export async function deleteInvoice(
 ): Promise<ActionResult> {
   try {
     await prisma.invoice.delete({ where: { id } });
-    revalidatePath("/invoices");
-    if (projectId) revalidatePath(`/projects/${projectId}`);
-    revalidatePath(`/clients/${clientId}`);
-    revalidatePath("/dashboard");
+    revalidateTag("invoices");
+    revalidateTag("dashboard");
   } catch {
     return { error: "Failed to delete invoice. Please try again." };
   }

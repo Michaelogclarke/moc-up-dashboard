@@ -1,5 +1,6 @@
 
 import { prisma } from "@/lib/db";
+import { unstable_cache } from "next/cache";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -8,19 +9,20 @@ import { formatCurrency, getStatusColor } from "@/lib/utils";
 import { Plus } from "lucide-react";
 import ProjectForm from "@/components/forms/ProjectForm";
 
-export default async function ProjectsPage() {
-  const [projects, clients] = await Promise.all([
+const getProjectsData = unstable_cache(
+  () => Promise.all([
     prisma.project.findMany({
-      include: {
-        client: true,
-        tasks: true,
-        invoices: true,
-        _count: { select: { milestones: true } },
-      },
+      include: { client: true, tasks: true, invoices: true, _count: { select: { milestones: true } } },
       orderBy: { updatedAt: "desc" },
     }),
     prisma.client.findMany({ orderBy: { name: "asc" } }),
-  ]);
+  ]),
+  ["projects"],
+  { tags: ["projects", "clients"] }
+);
+
+export default async function ProjectsPage() {
+  const [projects, clients] = await getProjectsData();
 
   const byStatus = (status: string) => projects.filter((p) => p.status === status);
 

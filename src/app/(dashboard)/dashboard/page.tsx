@@ -1,5 +1,6 @@
 
 import { prisma } from "@/lib/db";
+import { unstable_cache } from "next/cache";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
@@ -7,7 +8,7 @@ import { formatCurrency, getStatusColor } from "@/lib/utils";
 import { TrendingUp, FolderKanban, FileText, CheckSquare } from "lucide-react";
 import OnboardingGuide from "@/components/dashboard/OnboardingGuide";
 
-async function getDashboardData() {
+const getDashboardData = unstable_cache(async () => {
   const [
     totalRevenue,
     outstanding,
@@ -48,7 +49,7 @@ async function getDashboardData() {
     recentProjects,
     upcomingTasks,
   };
-}
+}, ["dashboard-data"], { tags: ["dashboard"] });
 
 export default async function DashboardPage() {
   const data = await getDashboardData();

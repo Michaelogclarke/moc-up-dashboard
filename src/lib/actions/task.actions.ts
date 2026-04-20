@@ -1,7 +1,7 @@
 "use server";
 
 import { prisma } from "@/lib/db";
-import { revalidatePath } from "next/cache";
+import { revalidateTag } from "next/cache";
 import type { TaskStatus, Priority } from "@prisma/client";
 import type { ActionResult } from "./types";
 
@@ -18,9 +18,8 @@ export async function createTask(formData: FormData): Promise<ActionResult> {
         projectId,
       },
     });
-    revalidatePath(`/projects/${projectId}`);
-    revalidatePath("/tasks");
-    revalidatePath("/dashboard");
+    revalidateTag("tasks");
+    revalidateTag("dashboard");
   } catch {
     return { error: "Failed to create task. Please try again." };
   }
@@ -39,9 +38,8 @@ export async function updateTask(id: string, formData: FormData): Promise<Action
         dueDate: formData.get("dueDate") ? new Date(formData.get("dueDate") as string) : null,
       },
     });
-    revalidatePath(`/projects/${projectId}`);
-    revalidatePath("/tasks");
-    revalidatePath("/dashboard");
+    revalidateTag("tasks");
+    revalidateTag("dashboard");
   } catch {
     return { error: "Failed to update task. Please try again." };
   }
@@ -50,9 +48,8 @@ export async function updateTask(id: string, formData: FormData): Promise<Action
 export async function deleteTask(id: string, projectId: string): Promise<ActionResult> {
   try {
     await prisma.task.delete({ where: { id } });
-    revalidatePath(`/projects/${projectId}`);
-    revalidatePath("/tasks");
-    revalidatePath("/dashboard");
+    revalidateTag("tasks");
+    revalidateTag("dashboard");
   } catch {
     return { error: "Failed to delete task. Please try again." };
   }
@@ -78,9 +75,8 @@ export async function cycleTaskStatus(
         completedAt: next === "DONE" ? new Date() : null,
       },
     });
-    revalidatePath(`/projects/${projectId}`);
-    revalidatePath("/tasks");
-    revalidatePath("/dashboard");
+    revalidateTag("tasks");
+    revalidateTag("dashboard");
   } catch {
     return { error: "Failed to update task status." };
   }
